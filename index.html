@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreetFood Maps - Find Local Street Food Vendors</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // JSONBin configuration
+        const BIN_ID = '67eeb2e78561e97a50f81e5b';
+        const API_KEY = '$2a$10$X1ouH4/z.oIeG0bcS7nzlutGJhLCTnntkqudL/TbcjBSnhpJwL3ra';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+
+        // Fetch vendors from JSONBin
+        async function loadVendors() {
+            try {
+                const response = await fetch(API_URL, {
+                    headers: {
+                        'X-Master-Key': API_KEY
+                    }
+                });
+                const data = await response.json();
+                displayVendors(data.record.vendors);
+            } catch (error) {
+                console.error('Error loading vendors:', error);
+                document.getElementById('vendor-list').innerHTML = 
+                    '<p class="error">⚠️ Failed to load vendors. Please try again later.</p>';
+            }
+        }
+
+        // Display vendors on page
+        function displayVendors(vendors) {
+            const vendorList = document.getElementById('vendor-list');
+            vendorList.innerHTML = '';
+
+            if (!vendors || vendors.length === 0) {
+                vendorList.innerHTML = '<p class="no-results">No vendors found. Be the first to add one!</p>';
+                return;
+            }
+
+            vendors.forEach(vendor => {
+                const vendorCard = document.createElement('div');
+                vendorCard.className = 'vendor-card';
+                vendorCard.innerHTML = `
+                    <h3><a href="vendor.html?id=${vendor.id}">${vendor.name}</a></h3>
+                    <p>📍 ${vendor.location}</p>
+                    <p>🍽️ ${vendor.dishes}</p>
+                    <p>⏰ ${vendor.timings}</p>
+                    ${vendor.image ? `<img src="${vendor.image}" alt="${vendor.name}" width="200">` : ''}
+                `;
+                vendorList.appendChild(vendorCard);
+            });
+        }
+
+        // Search functionality
+        function searchVendors() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const vendorCards = document.querySelectorAll('.vendor-card');
+            
+            vendorCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            loadVendors();
+            document.getElementById('search').addEventListener('input', searchVendors);
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>StreetFood Maps</h1>
+            <h2>Discover Hidden Street Food Gems Across India</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="submit.html">Add a Vendor</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="search-container">
+                <input type="text" id="search" placeholder="Search by dish or location...">
+                <button onclick="searchVendors()">Search</button>
+            </div>
+
+            <div id="map-placeholder">
+                <p>[Interactive Map Placeholder]</p>
+                <p><em>Future feature: Google Maps integration showing vendor locations</em></p>
+            </div>
+
+            <h3>Featured Street Food Vendors:</h3>
+            <div id="vendor-list" class="vendor-container">
+                <p>Loading vendors...</p>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About StreetFood Maps</h4>
+                    <p>Founded in 2024, our mission is to preserve and promote India's vibrant street food culture by connecting food lovers with authentic local vendors.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="submit.html">Add a Vendor</a></li>
+                        <li><a href="vendor.html">Vendors</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 StreetFood Maps. All rights reserved.</p>
+                <p>Data provided by food enthusiasts across India. Not affiliated with any government body.</p>
+                <p>Contact: visit contact page</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
