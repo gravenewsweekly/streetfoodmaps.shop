@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Details - StreetFood Maps</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // JSONBin configuration
+        const BIN_ID = '67eeb2e78561e97a50f81e5b';
+        const API_KEY = '$2a$10$X1ouH4/z.oIeG0bcS7nzlutGJhLCTnntkqudL/TbcjBSnhpJwL3ra';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+
+        // Get vendor ID from URL
+        function getVendorId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id');
+        }
+
+        // Load and display vendor details
+        async function loadVendorDetails() {
+            const vendorId = getVendorId();
+            if (!vendorId) {
+                document.getElementById('vendor-content').innerHTML = 
+                    '<p class="error">⚠️ No vendor specified</p>';
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                const data = await response.json();
+                const vendor = data.record.vendors.find(v => v.id === vendorId);
+
+                if (vendor) {
+                    displayVendor(vendor);
+                } else {
+                    document.getElementById('vendor-content').innerHTML = 
+                        '<p class="error">⚠️ Vendor not found</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('vendor-content').innerHTML = 
+                    '<p class="error">⚠️ Failed to load vendor details</p>';
+            }
+        }
+
+        // Display vendor information
+        function displayVendor(vendor) {
+            const vendorContent = document.getElementById('vendor-content');
+            
+            vendorContent.innerHTML = `
+                <div class="vendor-header">
+                    <h2>${vendor.name}</h2>
+                    <p class="location">📍 ${vendor.location}</p>
+                </div>
+                
+                ${vendor.image && vendor.image !== 'no-image.jpg' ? 
+                    `<img src="${vendor.image}" alt="${vendor.name}" class="vendor-image">` : 
+                    '<div class="no-image">📷 No Image Available</div>'}
+                
+                <div class="vendor-details">
+                    <h3>🍽️ Menu Highlights</h3>
+                    <p>${vendor.dishes.replace(/,/g, ', ')}</p>
+                    
+                    <h3>⏰ Operating Hours</h3>
+                    <p>${vendor.timings || 'Not specified'}</p>
+                    
+                    <div class="action-buttons">
+                        <button onclick="window.location.href='index.html'">← Back to Map</button>
+                        <button onclick="reportVendor('${vendor.id}')">⚠️ Report Issue</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Simple report function
+        function reportVendor(vendorId) {
+            const reason = prompt("What's wrong with this listing? (Incorrect info, closed, etc.)");
+            if (reason) {
+                alert(`Thank you! We've logged your report about vendor #${vendorId}.\nReason: ${reason}`);
+            }
+        }
+
+        // Initialize on page load
+        window.onload = loadVendorDetails;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>StreetFood Maps</h1>
+            <h2>Vendor Details</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="submit.html">Add Vendor</a></li>
+                    <li><a href="about.html">About</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div id="vendor-content">
+                <p>Loading vendor details...</p>
+            </div>
+
+            <div class="visitor-counter">
+                <p>You are visitor number: 
+                <img src="https://counter.websiteout.net/compte.php?S=streetfoodvendor&C=21&D=0&N=0&M=1" alt="Counter"></p>
+            </div>
+        </main>
+
+        <footer>
+            <div class="copyright">
+                <p>&copy;2025 StreetFood Maps</p>
+                <p>A blast from the past - Netscape Navigator recommended!</p>
+                <p class="disclaimer">All vendor information is user-submitted. Verify before visiting.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
