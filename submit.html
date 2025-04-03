@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Vendor - StreetFood Maps</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // JSONBin configuration (same as index.html)
+        const BIN_ID = '67eeb2e78561e97a50f81e5b';
+        const API_KEY = '$2a$10$X1ouH4/z.oIeG0bcS7nzlutGJhLCTnntkqudL/TbcjBSnhpJwL3ra';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        // Form submission handler
+        async function submitVendor(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const vendorName = document.getElementById('vendor-name').value;
+            const location = document.getElementById('location').value;
+            const dishes = document.getElementById('dishes').value;
+            const timings = document.getElementById('timings').value;
+            const imageUrl = document.getElementById('image-url').value || 'no-image.jpg';
+
+            // Simple validation
+            if (!vendorName || !location || !dishes) {
+                alert('Please fill in all required fields!');
+                return;
+            }
+
+            // Create new vendor object
+            const newVendor = {
+                id: Date.now().toString(),
+                name: vendorName,
+                location: location,
+                dishes: dishes,
+                timings: timings || "Not specified",
+                image: imageUrl
+            };
+
+            try {
+                // First fetch existing data
+                const response = await fetch(API_URL, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                const data = await response.json();
+                const existingVendors = data.record.vendors || [];
+
+                // Add new vendor
+                const updatedVendors = [...existingVendors, newVendor];
+
+                // Update JSONBin
+                const updateResponse = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({ vendors: updatedVendors })
+                });
+
+                if (updateResponse.ok) {
+                    // Success - show confirmation and reset form
+                    document.getElementById('success-message').style.display = 'block';
+                    document.getElementById('vendor-form').reset();
+                    setTimeout(() => {
+                        document.getElementById('success-message').style.display = 'none';
+                    }, 3000);
+                } else {
+                    throw new Error('Failed to update data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to submit vendor. Please try again later.');
+            }
+        }
+
+        // Initialize form submission
+        window.onload = function() {
+            document.getElementById('vendor-form').addEventListener('submit', submitVendor);
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Add a Street Food Vendor</h1>
+            <h2>Help us document India's delicious street food culture!</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html">← Back to Map</a></li>
+                    <li><a href="guidelines.html">Guidelines</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div id="success-message" class="success-banner">
+                Vendor submitted successfully! Thank you 🎉
+            </div>
+
+            <form id="vendor-form" class="retro-form">
+                <div class="form-group">
+                    <label for="vendor-name">Vendor Name*:</label>
+                    <input type="text" id="vendor-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Location* (Area, City):</label>
+                    <input type="text" id="location" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="dishes">Dishes/Specialties* (comma separated):</label>
+                    <input type="text" id="dishes" required placeholder="e.g., Pani Puri, Dahi Puri, Sev Puri">
+                </div>
+
+                <div class="form-group">
+                    <label for="timings">Operating Hours:</label>
+                    <input type="text" id="timings" placeholder="e.g., 7AM-10PM">
+                </div>
+
+                <div class="form-group">
+                    <label for="image-url">Image URL (optional):</label>
+                    <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
+                    <p class="hint">Upload to <a href="https://imgbb.com/" target="_blank">ImgBB</a> first if you have a photo</p>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit">Submit Vendor</button>
+                </div>
+            </form>
+
+            <section id="guidelines" class="guidelines">
+                <h3>Submission Guidelines:</h3>
+                <ul>
+                    <li>✔ Provide accurate location details</li>
+                    <li>✔ List all major dishes served</li>
+                    <li>✔ Only submit public street vendors (no home kitchens)</li>
+                    <li>✖ No chain restaurants or established eateries</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            <div class="copyright">
+                <p>&copy; 2025 StreetFood Maps | A community project</p>
+                <p>This is a good site.</p>
+                <div class="web-counter">
+                    <img src="https://counter.websiteout.net/compte.php?S=streetfoodmaps&C=21&D=0&N=0&M=1" alt="Hit Counter">
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
