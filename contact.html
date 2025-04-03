@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - StreetFood Maps</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // JSONBin configuration
+        const BIN_ID = '67eeb2e78561e97a50f81e5b';
+        const API_KEY = '$2a$10$X1ouH4/z.oIeG0bcS7nzlutGJhLCTnntkqudL/TbcjBSnhpJwL3ra';
+        const CONTACT_BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        async function submitContactForm(event) {
+            event.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            const priority = document.querySelector('input[name="priority"]:checked').value;
+
+            // Simple validation
+            if (!name || !message) {
+                alert('⚠️ Please fill in all required fields!');
+                return;
+            }
+
+            // Create new contact object
+            const newContact = {
+                id: Date.now().toString(),
+                name: name,
+                email: email || "Not provided",
+                message: message,
+                priority: priority,
+                date: new Date().toLocaleString(),
+                status: "unread"
+            };
+
+            try {
+                // First fetch existing data
+                const response = await fetch(CONTACT_BIN_URL, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                const data = await response.json();
+                const existingData = data.record || { vendors: [], contacts: [] };
+
+                // Add new contact
+                const updatedContacts = [...(existingData.contacts || []), newContact];
+                const updatedData = { ...existingData, contacts: updatedContacts };
+
+                // Update JSONBin
+                const updateResponse = await fetch(CONTACT_BIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                if (updateResponse.ok) {
+                    // Show success animation
+                    document.getElementById('form-container').innerHTML = `
+                        <div class="success-animation">
+                            <img src="https://www.animatedimages.org/data/media/202/animated-checkmark-image-0014.gif" alt="Success">
+                            <h3>Message Sent!</h3>
+                            <p>We'll get back to you in 3-5 business days</p>
+                            <button onclick="window.location.href='index.html'">← Back to Home</button>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Failed to update data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('🚨 Failed to send message. Please try again later.');
+            }
+        }
+
+        // Initialize form submission
+        window.onload = function() {
+            document.getElementById('contact-form').addEventListener('submit', submitContactForm);
+        };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Contact StreetFood Maps</h1>
+            <h2>Questions? Complaints? Vendor requests?</h2>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="privacy.html">Privacy</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="contact-header">
+                <img src="https://www.animatedimages.org/data/media/169/animated-envelope-image-0079.gif" alt="Animated envelope">
+                <p>We <img src="https://www.animatedimages.org/data/media/202/animated-heart-image-0023.gif" alt="heart"> hearing from you!</p>
+            </div>
+
+            <div id="form-container">
+                <form id="contact-form" class="retro-contact-form">
+                    <div class="form-group">
+                        <label for="name">Your Name*:</label>
+                        <input type="text" id="name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email:</label>
+                        <input type="text" id="email" placeholder="(Optional but recommended)">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Message*:</label>
+                        <textarea id="message" rows="6" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Priority:</label>
+                        <div class="radio-group">
+                            <label>
+                                <input type="radio" name="priority" value="low" checked> 
+                                <span class="radio-label">📢 General Question</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="priority" value="medium"> 
+                                <span class="radio-label">⚠️ Vendor Issue</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="priority" value="high"> 
+                                <span class="radio-label">🚨 Urgent Problem</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit">Send Message</button>
+                        <button type="reset">Clear Form</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="contact-methods">
+                <h3>Other Ways to Reach Us:</h3>
+                <ul>
+                    <li>📞 Phone: <strong>+91-810-335-6828</strong> (10AM-6PM)</li>
+                    <li>📠 Fax: Just kidding, it's 2024!</li>
+                    <li>📫 Mail: handedaksh@gmail.com, Indore (Yes, really)</li>
+                </ul>
+            </div>
+        </main>
+
+        <footer>
+            <div class="copyright">
+                <p>&copy; 2025 StreetFood Maps</p>
+                <p class="disclaimer">Messages stored via JSONBin.io. real customer support exists.</p>
+                <div class="hit-counter">
+                    <img src="https://counter.websiteout.net/compte.php?S=streetfoodcontact&C=21&D=0&N=0&M=1" alt="Counter">
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
